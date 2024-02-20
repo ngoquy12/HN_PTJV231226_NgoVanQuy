@@ -80,3 +80,5 @@
 // }
 
 // renderProgress();
+
+console.log("Update github");
