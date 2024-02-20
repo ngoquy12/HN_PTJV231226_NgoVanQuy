@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="container">
+      <main class="main">
+        <h2 class="heading">Danh sách công việc</h2>
+        <form class="form" id="form">
+          <div class="input-container">
+            <input id="inputJob" class="input" type="text" />
+            <button class="btn-add">Thêm</button>
+          </div>
+          <p style="display: none" class="error">
+            Tên công việc không được phép để trống.
+          </p>
+        </form>
+        <ul class="list-job"></ul>
+        <footer class="footer">
+          <h4>Tiến độ hoàn thành: <span class="percent">50%</span></h4>
+        </footer>
+      </main>
+    </div>
+    <script>
+      //Lấy element của form
+      let formElement = document.querySelector("#form");
+      let inputJob = document.querySelector("#inputJob");
+      let error = document.querySelector(".error");
+      let listJob = document.querySelector(".list-job");
+
+      //Lấy dữ liệu trên local
+      let jobLocals = JSON.parse(localStorage.getItem("jobs")) || [];
+
+      //Lắng nghe sự kiện submit form
+      formElement.addEventListener("submit", function (e) {
+        // Ngăn chặn sự kiện mặc định của form
+        e.preventDefault();
+
+        // Kiểm tra dữ liệu đầu vào
+        if (!inputJob.value) {
+          // Hiển thị lỗi
+          error.style.display = "block";
+        } else {
+          // Ẩn lỗi
+          error.style.display = "none";
+        }
+
+        //Tạo đối tượng job và gửi dữ liệu lên localStorage
+        if (inputJob.value) {
+          // Tạo đối tượng job
+          let job = {
+            id: Math.ceil(Math.random() * 1000000),
+            name: inputJob.value,
+            status: false,
+          };
+
+          //  Lấy dữ liệu trên local về và nó có dạng mảng
+          // Push đối tượng job vào mảng
+          jobLocals.push(job);
+          //Lưu mảng công việc lên local
+          localStorage.setItem("jobs", JSON.stringify(jobLocals));
+          //Clean giá trị trong ô input
+          inputJob.value = "";
+          //  focus vào trong ô input
+          inputJob.focus();
+          // Gọi hàm render để cập nhật lại dữ liệu mới nhất cho giao diện
+          render();
+        }
+      });
+
+      // Hàm render danh sách công việc
+      function render() {
+        let jobHtmls = jobLocals.map(function (job) {
+          return `
+          <li class="job-item">
+            <div class="item-left">
+              <input type="checkbox" />
+              <p>${job.name}</p>
+            </div>
+            <div class="item-right"><i onclick="handleDelete(${job.id})" class="fa-solid fa-trash"></i></div>
+          </li>
+          `;
+        });
+
+        // Chuyển đổi một mảng thành chuỗi HTML
+        let jobConvert = jobHtmls.join("");
+
+        // Gắn chuỗi HTML vào trong DOM
+        listJob.innerHTML = jobConvert;
+      }
+
+      // Gọi hàm render
+      render();
+
+      // Hàm xóa công việc theo id
+      function handleDelete(id) {
+        // Mở modal xác nhận xóa
+        let isConfirm = confirm("Bạn có chắc chắn muốn xóa công việc này?");
+
+        // Kiểm tra xác nhận xóa
+        if (isConfirm) {
+          // Lọc ra những công việc có id khác với id cần xóa
+          let filterJobs = jobLocals.filter(function (job) {
+            // Lọc ra những công việc có id khác với id cần xóa
+            return job.id !== id;
+          });
+          // Lưu dữ liệu lên localStorage
+          localStorage.setItem("jobs", JSON.stringify(filterJobs));
+          // Gọi hàm render để cập nhật lại giao diện
+          // render();
+          location.reload();
+        }
+      }
+    </script>
+  </body>
+</html>
